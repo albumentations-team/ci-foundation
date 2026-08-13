@@ -1,0 +1,62 @@
+name: Install or verify CPU-only Torch
+description: Install an explicit Torch requirement from the PyTorch CPU index or verify an existing CPU-only runtime.
+
+inputs:
+  mode:
+    description: install resolves an explicit Torch requirement; verify only inspects the existing interpreter.
+    required: true
+  python:
+    description: Interpreter that receives or verifies Torch.
+    required: false
+    default: python
+  requirement:
+    description: Direct Torch requirement for install mode, for example torch>=2.13.0.
+    required: false
+    default: ""
+  output-json:
+    description: Optional evidence JSON path, relative to the consumer workspace.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Validate CPU Torch action inputs
+      shell: bash
+      env:
+        TORCH_MODE: ${{ inputs.mode }}
+        TORCH_REQUIREMENT: ${{ inputs.requirement }}
+      run: |
+        case "${TORCH_MODE}" in
+          install)
+            if [ -z "${TORCH_REQUIREMENT}" ]; then
+              echo "install mode requires a direct Torch requirement." >&2
+              exit 2
+            fi
+            ;;
+          verify) ;;
+          *) echo "Unknown Torch CPU action mode: ${TORCH_MODE}" >&2; exit 2 ;;
+        esac
+
+    - name: Install CPU-only Torch
+      if: inputs.mode == 'install'
+      shell: bash
+      env:
+        TORCH_PYTHON: ${{ inputs.python }}
+        TORCH_REQUIREMENT: ${{ inputs.requirement }}
+      run: >-
+        python "${GITHUB_ACTION_PATH}/install_torch_cpu.py"
+        --python "${TORCH_PYTHON}"
+        --requirement "${TORCH_REQUIREMENT}"
+
+    - name: Verify CPU-only Torch runtime
+      shell: bash
+      env:
+        TORCH_EVIDENCE_PATH: ${{ inputs.output-json }}
+        TORCH_PYTHON: ${{ inputs.python }}
+      run: |
+        output_args=()
+        if [ -n "${TORCH_EVIDENCE_PATH}" ]; then
+          output_args=(--output-json "${TORCH_EVIDENCE_PATH}")
+        fi
+        "${TORCH_PYTHON}" "${GITHUB_ACTION_PATH}/verify_torch_cpu.py" "${output_args[@]}"

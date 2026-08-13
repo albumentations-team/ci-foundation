@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate actions and helpers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - uses: ./actions/setup-python-uv
+        with:
+          python-version: "3.13"
+          cache-dependency-glob: uv.lock
+          cache-suffix: ci-foundation-dev
+
+      - name: Install locked development tools
+        run: uv sync --locked --group dev
+
+      - name: Run unit tests
+        run: uv run pytest
+
+      - name: Run Ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Run actionlint
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+          "$(go env GOPATH)/bin/actionlint"
+
+      - name: Run Zizmor
+        run: uv run zizmor .github

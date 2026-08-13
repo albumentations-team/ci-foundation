@@ -1,0 +1,29 @@
+name: Set up Python and uv
+description: Install Python and uv with one explicit dependency-cache contract. This action never installs project dependencies.
+
+inputs:
+  python-version:
+    description: Python version accepted by astral-sh/setup-uv.
+    required: true
+  cache-dependency-glob:
+    description: Every lock or requirements input that changes the cached environment.
+    required: true
+  cache-suffix:
+    description: Stable caller-defined cache discriminator, such as ci-test-torch-cpu.
+    required: true
+  activate-environment:
+    description: Whether setup-uv activates the selected Python environment.
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Install uv and Python ${{ inputs.python-version }}
+      uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
+      with:
+        activate-environment: ${{ inputs.activate-environment }}
+        cache-dependency-glob: ${{ inputs.cache-dependency-glob }}
+        cache-suffix: ${{ inputs.cache-suffix }}
+        enable-cache: true
+        python-version: ${{ inputs.python-version }}

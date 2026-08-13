@@ -1,0 +1,87 @@
+name: Prepare Antigravity review inputs
+description: Validate trusted Antigravity inputs and prepare a publishable review artifact without executing caller content.
+
+inputs:
+  operation:
+    description: select validates a path policy; prepare-review validates Gemini JSON and writes a review artifact.
+    required: false
+    default: select
+  policy-path:
+    description: Relative TOML policy path in the checked-out trusted base.
+    required: false
+    default: ""
+  changed-files-json:
+    description: GitHub API payload containing pull request changed files.
+    required: false
+    default: ""
+  gemini-output:
+    description: Gemini CLI JSON result to validate for prepare-review.
+    required: false
+    default: ""
+  review-output:
+    description: Destination for the validated Markdown review artifact.
+    required: false
+    default: ""
+
+outputs:
+  selected:
+    description: true when at least one changed path is selected for review.
+    value: ${{ steps.policy.outputs.selected }}
+  selected-paths-json:
+    description: JSON list of selected changed paths.
+    value: ${{ steps.policy.outputs.selected-paths-json }}
+  instructions-path:
+    description: Relative trusted-base path to model instructions.
+    value: ${{ steps.policy.outputs.instructions-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Validate action inputs
+      shell: bash
+      env:
+        OPERATION: ${{ inputs.operation }}
+        POLICY_PATH: ${{ inputs.policy-path }}
+        PR_CHANGED_FILES: ${{ inputs.changed-files-json }}
+        GEMINI_OUTPUT: ${{ inputs.gemini-output }}
+        REVIEW_OUTPUT: ${{ inputs.review-output }}
+      run: |
+        case "${OPERATION}" in
+          select)
+            test -n "${POLICY_PATH}"
+            test -n "${PR_CHANGED_FILES}"
+            ;;
+          prepare-review)
+            test -n "${GEMINI_OUTPUT}"
+            test -n "${REVIEW_OUTPUT}"
+            ;;
+          *)
+            echo "Unknown Antigravity action operation: ${OPERATION}" >&2
+            exit 2
+            ;;
+        esac
+
+    - id: policy
+      if: inputs.operation == 'select'
+      name: Validate policy and select changed paths
+      shell: bash
+      env:
+        POLICY_PATH: ${{ inputs.policy-path }}
+        PR_CHANGED_FILES: ${{ inputs.changed-files-json }}
+      run: >-
+        python "${GITHUB_ACTION_PATH}/prepare_policy.py"
+        --policy "${POLICY_PATH}"
+        --changed-files "${PR_CHANGED_FILES}"
+        --github-output "${GITHUB_OUTPUT}"
+
+    - id: review
+      if: inputs.operation == 'prepare-review'
+      name: Validate Gemini result and prepare review artifact
+      shell: bash
+      env:
+        GEMINI_OUTPUT: ${{ inputs.gemini-output }}
+        REVIEW_OUTPUT: ${{ inputs.review-output }}
+      run: >-
+        python "${GITHUB_ACTION_PATH}/prepare_review.py"
+        --input "${GEMINI_OUTPUT}"
+        --output "${REVIEW_OUTPUT}"
