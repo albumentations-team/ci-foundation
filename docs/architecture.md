@@ -7,7 +7,7 @@ AlbumentationsX and Albucore are public callers. Consumers execute pinned commit
 
 | Foundation owns | Consumer owns |
 | --- | --- |
-| Python and uv bootstrap | Python versions and dependency graphs |
+| Python and uv bootstrap | Pinned Python and uv versions, dependency graphs |
 | Explicit CPU-only Torch install and verification | Whether Torch is needed and its version constraint |
 | Trusted Antigravity policy parsing, review artifact validation, and review orchestration | PR trigger, project path policy, model instructions, and cloud variables |
 | Foundation unit tests, actionlint, and Zizmor | Tests, build, release, license, legal, deployment, and product checks |

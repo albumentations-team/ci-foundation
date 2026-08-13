@@ -5,6 +5,9 @@ inputs:
   python-version:
     description: Python version accepted by astral-sh/setup-uv.
     required: true
+  uv-version:
+    description: Exact uv version. Pinning it makes lock generation and installation reproducible.
+    required: true
   cache-dependency-glob:
     description: Every lock or requirements input that changes the cached environment.
     required: true
@@ -31,3 +34,4 @@ runs:
         cache-suffix: ${{ inputs.cache-suffix }}
         enable-cache: ${{ inputs.cache-enabled }}
         python-version: ${{ inputs.python-version }}
+        version: ${{ inputs.uv-version }}

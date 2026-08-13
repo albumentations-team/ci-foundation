@@ -23,12 +23,14 @@ def test_setup_action_has_no_dependency_install_step() -> None:
     action = _load_yaml(SETUP_ACTION)
     action_text = SETUP_ACTION.read_text(encoding="utf-8")
 
+    assert action["inputs"]["uv-version"]["required"] is True
     assert action["inputs"]["cache-dependency-glob"]["required"] is True
     assert action["inputs"]["cache-suffix"]["required"] is True
     assert action["inputs"]["cache-enabled"]["default"] == "true"
     assert "uv sync" not in action_text
     assert "uv pip install" not in action_text
     assert "pip install" not in action_text
+    assert "version: ${{ inputs.uv-version }}" in action_text
 
 
 def test_torch_action_exposes_install_and_verify_without_accelerator_fallback() -> None:

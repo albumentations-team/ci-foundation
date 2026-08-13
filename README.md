@@ -14,13 +14,15 @@ Consumers must reference a full commit SHA. Release tags name the SHA for humans
 - uses: albumentations-team/ci-foundation/actions/setup-python-uv@<full-commit-sha>
   with:
     python-version: "3.13"
+    uv-version: "0.12.0"
     cache-dependency-glob: |
       pyproject.toml
       uv.lock
     cache-suffix: ci-test-torch-cpu
 ```
 
-`setup-python-uv` installs Python and uv only. The caller selects and installs its own dependency graph.
+`setup-python-uv` installs the caller-pinned Python and uv versions only. The caller selects and installs its own
+dependency graph.
 Set `cache-enabled: "false"` only for a job whose cache policy intentionally prohibits restore and save.
 
 ```yaml
