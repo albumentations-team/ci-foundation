@@ -25,6 +25,7 @@ def test_setup_action_has_no_dependency_install_step() -> None:
 
     assert action["inputs"]["cache-dependency-glob"]["required"] is True
     assert action["inputs"]["cache-suffix"]["required"] is True
+    assert action["inputs"]["cache-enabled"]["default"] == "true"
     assert "uv sync" not in action_text
     assert "uv pip install" not in action_text
     assert "pip install" not in action_text

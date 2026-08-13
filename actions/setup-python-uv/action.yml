@@ -11,6 +11,10 @@ inputs:
   cache-suffix:
     description: Stable caller-defined cache discriminator, such as ci-test-torch-cpu.
     required: true
+  cache-enabled:
+    description: Whether setup-uv restores and saves the dependency cache.
+    required: false
+    default: "true"
   activate-environment:
     description: Whether setup-uv activates the selected Python environment.
     required: false
@@ -25,5 +29,5 @@ runs:
         activate-environment: ${{ inputs.activate-environment }}
         cache-dependency-glob: ${{ inputs.cache-dependency-glob }}
         cache-suffix: ${{ inputs.cache-suffix }}
-        enable-cache: true
+        enable-cache: ${{ inputs.cache-enabled }}
         python-version: ${{ inputs.python-version }}

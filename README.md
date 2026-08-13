@@ -21,6 +21,7 @@ Consumers must reference a full commit SHA. Release tags name the SHA for humans
 ```
 
 `setup-python-uv` installs Python and uv only. The caller selects and installs its own dependency graph.
+Set `cache-enabled: "false"` only for a job whose cache policy intentionally prohibits restore and save.
 
 ```yaml
 - uses: albumentations-team/ci-foundation/actions/torch-cpu@<full-commit-sha>
