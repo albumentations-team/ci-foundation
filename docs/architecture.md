@@ -7,13 +7,15 @@ AlbumentationsX and Albucore are public callers. Consumers execute pinned commit
 
 | Foundation owns | Consumer owns |
 | --- | --- |
-| Python and uv bootstrap | Pinned Python and uv versions, dependency graphs |
+| Cached and uncached Python/uv bootstrap | Pinned Python and uv versions, dependency graphs |
 | Explicit CPU-only Torch install and verification | Whether Torch is needed and its version constraint |
 | Trusted Antigravity policy parsing, review artifact validation, and review orchestration | PR trigger, project path policy, model instructions, and cloud variables |
 | Foundation unit tests, actionlint, and Zizmor | Tests, build, release, license, legal, deployment, and product checks |
 
 Actions must not install a consumer dependency graph or choose an accelerator runtime. A caller declares its own
 dependencies and asks `torch-cpu` to verify the selected environment, or explicitly requests a CPU-only Torch install.
+`setup-python-uv-uncached` is mandatory when a workflow executes an operator-selected commit in a release or other
+sensitive context; it has no cache restore or save path.
 
 ## Versioning and upgrades
 

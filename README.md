@@ -25,6 +25,17 @@ Consumers must reference a full commit SHA. Release tags name the SHA for humans
 dependency graph.
 Set `cache-enabled: "false"` only for a job whose cache policy intentionally prohibits restore and save.
 
+For a workflow that checks out an operator-selected commit, use the separate
+`setup-python-uv-uncached` action instead. It contains no dependency-cache integration, so static analysis can prove
+that the candidate cannot poison a default-branch cache.
+
+```yaml
+- uses: albumentations-team/ci-foundation/actions/setup-python-uv-uncached@<full-commit-sha>
+  with:
+    python-version: "3.11"
+    uv-version: "0.12.0"
+```
+
 ```yaml
 - uses: albumentations-team/ci-foundation/actions/torch-cpu@<full-commit-sha>
   with:

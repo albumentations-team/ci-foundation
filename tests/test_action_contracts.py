@@ -8,6 +8,7 @@ import yaml
 
 REPOSITORY_ROOT = Path(__file__).parents[1]
 SETUP_ACTION = REPOSITORY_ROOT / "actions" / "setup-python-uv" / "action.yml"
+UNCACHED_SETUP_ACTION = REPOSITORY_ROOT / "actions" / "setup-python-uv-uncached" / "action.yml"
 TORCH_ACTION = REPOSITORY_ROOT / "actions" / "torch-cpu" / "action.yml"
 ANTIGRAVITY_ACTION = REPOSITORY_ROOT / "actions" / "antigravity-policy" / "action.yml"
 FULL_SHA = re.compile(r"@[0-9a-f]{40}(?:\s|$)")
@@ -33,6 +34,16 @@ def test_setup_action_has_no_dependency_install_step() -> None:
     assert "version: ${{ inputs.uv-version }}" in action_text
 
 
+def test_uncached_setup_action_has_no_cache_integration() -> None:
+    action = _load_yaml(UNCACHED_SETUP_ACTION)
+    action_text = UNCACHED_SETUP_ACTION.read_text(encoding="utf-8")
+
+    assert set(action["inputs"]) == {"python-version", "uv-version", "activate-environment"}
+    assert "cache-" not in action_text
+    assert "enable-cache" not in action_text
+    assert "version: ${{ inputs.uv-version }}" in action_text
+
+
 def test_torch_action_exposes_install_and_verify_without_accelerator_fallback() -> None:
     action = _load_yaml(TORCH_ACTION)
     action_text = TORCH_ACTION.read_text(encoding="utf-8")
@@ -54,7 +65,7 @@ def test_antigravity_action_has_explicit_select_and_prepare_operations() -> None
 
 
 def test_all_third_party_action_references_are_full_sha_pins() -> None:
-    for action_path in (SETUP_ACTION, TORCH_ACTION, ANTIGRAVITY_ACTION):
+    for action_path in (SETUP_ACTION, UNCACHED_SETUP_ACTION, TORCH_ACTION, ANTIGRAVITY_ACTION):
         for line in action_path.read_text(encoding="utf-8").splitlines():
             if "uses:" in line and "./" not in line:
                 reference = line.split("uses:", maxsplit=1)[1].strip().split(" #", maxsplit=1)[0]
